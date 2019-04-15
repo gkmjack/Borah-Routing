@@ -6,19 +6,35 @@
 #include <iostream>
 
 
-Point* Circuit::index(int x, int y) const
+auto Circuit::findPoint(int x, int y) const
 {
-  int i = (y-1)*size+(x-1);
-  return points[i];
+  int index = (y-1)*size+(x-1);
+  auto it = all_points.begin();
+  for (int i = 0; i < index; i++) it++;
+  return it;
+}
+
+auto Circuit::findNet(Point* p1, Point* p2) const
+{
+  auto it = nets.begin();
+  while(it != nets.end()) {
+    Point* a = (*it)->getA();
+    Point* b = (*it)->getB();
+    if((a == p1 && b == p2) || (a == p2 && b == p1)) {
+      return it;
+    }
+    it++;
+  }
+  return it;
 }
 
 Circuit::Circuit(int size):
 size(size)
 {
-  points = std::vector<Point*>(size*size);
+  all_points = std::vector<Point*>(size*size);
   for (int y = 1; y <= size; y++) {
     for (int x = 1; x <= size; x++) {
-      points[(y-1)*size+(x-1)] = new Point(x,y);
+      all_points[(y-1)*size+(x-1)] = new Point(x,y);
     }
   }
   nets = std::list<Net*>();
@@ -26,12 +42,22 @@ size(size)
 
 void Circuit::use(int x, int y, bool state)
 {
-  index(x,y)->use(state);
+  Point* p = *findPoint(x,y);
+  p->use(state);
+  if(state) {
+    used_points.push_back(p);
+  } else {
+    auto it = used_points.begin();
+    for (; it != used_points.end(); it++) {
+      if(*it == p) used_points.erase(it);
+    }
+  }
 }
 
 bool Circuit::isUsed(int x, int y) const
 {
-  return index(x,y)->isUsed();
+  Point* p = *findPoint(x,y);
+  return p->isUsed();
 }
 
 void Circuit::generateMST()
@@ -39,11 +65,7 @@ void Circuit::generateMST()
   nets.clear();
   // Erase existing contents
 
-  std::list<Point*> unmapped;
-  for (auto it = points.begin(); it != points.end(); it++)
-    if ((*it)->isUsed()) {
-      unmapped.push_back(*it);
-    }
+  std::list<Point*> unmapped = used_points;
 
   std::list<Point*> mapped(unmapped.size());
   if(unmapped.size()) {
@@ -85,4 +107,10 @@ int Circuit::totalCost() const
     total += (*it)->getWeight();
 
   return total;
+}
+
+void Circuit::linkTree()
+{
+  std::list<Net*> unmapped_nets = nets;
+  std::list<Point*> ummaped_points = used_points;
 }

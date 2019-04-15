@@ -25,3 +25,13 @@ bool Point::isUsed() const
 {
   return used;
 }
+
+void Point::setParent(Point* p)
+{
+  parent = p;
+}
+
+Point* Point::getParent() const
+{
+  return parent;
+}

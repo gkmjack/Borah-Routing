@@ -8,11 +8,13 @@ class Net;
 class Circuit
 {
 private:
-  std::vector<Point*> points;
+  std::vector<Point*> all_points;
+  std::list<Point*> used_points;
   std::list<Net*> nets;
   const int size;
 
-  Point* index(int, int) const;
+  auto findPoint(int, int) const;
+  auto findNet(Point*,Point*) const;
 
 public:
   Circuit(int);
@@ -20,4 +22,6 @@ public:
   bool isUsed(int, int) const;
   void generateMST();
   int totalCost() const;
+
+  void linkTree();
 };

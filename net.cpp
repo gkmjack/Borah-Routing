@@ -14,12 +14,12 @@ a(a), b(b), weight(Net::cost(a,b))
 
 }
 
-const Point* Net::getA() const
+Point* Net::getA() const
 {
   return a;
 }
 
-const Point* Net::getB() const
+Point* Net::getB() const
 {
   return b;
 }
