@@ -26,5 +26,5 @@ public:
   void linkTree();
   Point* closest_ancestor(Point*, Point*);
   std::set<Net*>::iterator longest_redundancy(Point*, Point*);
-  void test();
+  void borah_route();
 };
