@@ -25,7 +25,12 @@ auto Circuit::findNet(Point* p1, Point* p2) const
     }
     it++;
   }
+  if(it == nets.end()) {
+    std::cout << "Couldn't find the net." << std::endl;
+    exit(1);
+  }
   return it;
+
 }
 
 Circuit::Circuit(int size):
@@ -96,6 +101,7 @@ void Circuit::generateMST()
     // Transfer the net into the other list
   }
   linkTree();
+  test();
 }
 
 int Circuit::totalCost() const
@@ -109,6 +115,9 @@ int Circuit::totalCost() const
 
 void Circuit::linkTree()
 {
+  for (auto it = all_points.begin(); it != all_points.end(); it++)
+    (*it)->setParent(NULL);
+
   std::set<Net*> ump_nets = nets;
   std::set<Point*> ump_pts = used_points;
   std::set<Point*> mp_pts;
@@ -150,4 +159,64 @@ void Circuit::linkTree()
 
   }
   std::cout << "Tree formation complete" << std::endl;
+}
+
+Point* Circuit::closest_ancestor(Point* p1, Point* p2)
+{
+  // Find the closest common ancestor between the two nodes
+  std::vector<Point*> p1_anc, p2_anc;
+  Point* temp = p1;
+  while(temp) {
+    p1_anc.push_back(temp);
+    temp = temp->getParent();
+  }
+  temp = p2;
+  while(temp) {
+    p2_anc.push_back(temp);
+    temp = temp->getParent();
+  }
+  // Put the ancestors of each node in a vector
+  Point* cca = NULL; // Closest common ancestor
+  for (auto it1 = p1_anc.begin(); it1 != p1_anc.end(); it1++) {
+    bool found = false;
+    for (auto it2 = p2_anc.begin(); it2 != p2_anc.end(); it2++) {
+      if (*it1 == *it2) {
+        found = true;
+        cca = *it1;
+        break;
+      }
+    }
+    if(found) break;
+  }
+  if(cca) return cca;
+  else {
+    std::cout << "Can't find the closest common ancestor" << std::endl;
+    exit(2);
+  }
+}
+
+std::set<Net*>::iterator Circuit::longest_redundancy(Point* p1, Point* p2)
+{
+  Point* cca = closest_ancestor(p1, p2);
+
+  // Find the longest among nets up to that ancestor
+  auto longest = nets.end();
+  int highest_cost = 0;
+  bool go_again = true;
+  Point* temp;
+redo:
+  temp = go_again ? p1 : p2;
+  while(temp != cca) {
+    auto it = findNet(temp, temp->getParent());
+    if (longest==nets.end() || (*it)->getWeight()>(*longest)->getWeight()) {
+      longest = it;
+      highest_cost = (*it)->getWeight();
+    }
+    temp = temp->getParent();
+  }
+  if(go_again) {
+    go_again = false;
+    goto redo;
+  }
+  return longest;
 }
