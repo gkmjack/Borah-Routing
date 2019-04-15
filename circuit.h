@@ -1,5 +1,5 @@
-#include <list>
 #include <vector>
+#include <set>
 
 class Point;
 class Net;
@@ -9,8 +9,8 @@ class Circuit
 {
 private:
   std::vector<Point*> all_points;
-  std::list<Point*> used_points;
-  std::list<Net*> nets;
+  std::set<Point*> used_points;
+  std::set<Net*> nets;
   const int size;
 
   auto findPoint(int, int) const;

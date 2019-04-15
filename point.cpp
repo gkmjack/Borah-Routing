@@ -1,7 +1,7 @@
 # include "point.h"
 
 Point::Point(int x, int y):
-x(x), y(y)
+x(x), y(y), parent(0)
 {
   used = false;
 }

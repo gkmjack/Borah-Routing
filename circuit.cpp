@@ -37,7 +37,7 @@ size(size)
       all_points[(y-1)*size+(x-1)] = new Point(x,y);
     }
   }
-  nets = std::list<Net*>();
+  nets = std::set<Net*>();
 }
 
 void Circuit::use(int x, int y, bool state)
@@ -45,12 +45,9 @@ void Circuit::use(int x, int y, bool state)
   Point* p = *findPoint(x,y);
   p->use(state);
   if(state) {
-    used_points.push_back(p);
+    used_points.insert(p);
   } else {
-    auto it = used_points.begin();
-    for (; it != used_points.end(); it++) {
-      if(*it == p) used_points.erase(it);
-    }
+    used_points.erase(used_points.find(p));
   }
 }
 
@@ -65,12 +62,12 @@ void Circuit::generateMST()
   nets.clear();
   // Erase existing contents
 
-  std::list<Point*> unmapped = used_points;
+  std::set<Point*> unmapped = used_points;
 
-  std::list<Point*> mapped(unmapped.size());
+  std::set<Point*> mapped;
   if(unmapped.size()) {
-    mapped.push_back(unmapped.front());
-    unmapped.pop_front();
+    mapped.insert(*unmapped.begin());
+    unmapped.erase(unmapped.begin());
   } else {
     std::cout << "Generating MST on an empty set" << std::endl;
     exit(2);
@@ -92,12 +89,13 @@ void Circuit::generateMST()
     }
     // Find the minimum-cost net. The map can't contain just 1 element
 
-    nets.push_back(new Net(*min_m, *min_u));
+    nets.insert(new Net(*min_m, *min_u));
     // Create a new net
-    mapped.push_back(*min_u);
+    mapped.insert(*min_u);
     unmapped.erase(min_u);
     // Transfer the net into the other list
   }
+  linkTree();
 }
 
 int Circuit::totalCost() const
@@ -111,6 +109,45 @@ int Circuit::totalCost() const
 
 void Circuit::linkTree()
 {
-  std::list<Net*> unmapped_nets = nets;
-  std::list<Point*> ummaped_points = used_points;
+  std::set<Net*> ump_nets = nets;
+  std::set<Point*> ump_pts = used_points;
+  std::set<Point*> mp_pts;
+  // Initialize things
+
+  if(ump_nets.size()) {
+    mp_pts.insert(*ump_pts.begin());
+    ump_pts.erase(ump_pts.begin());
+    (*mp_pts.begin())->setParent(NULL);
+  } else {
+    std::cout << "Generating tree on an empty set" << std::endl;
+    exit(2);
+  }
+  // Set up the root
+
+  while(!ump_nets.empty()) {
+    for(auto it = ump_nets.begin(); it != ump_nets.end(); it++) {
+      Point* a = (*it)->getA();
+      Point* b = (*it)->getB();
+      if(mp_pts.find(a) != mp_pts.end() && mp_pts.find(b) != mp_pts.end()) {
+        std::cout << "A loop is contained!" << std::endl;
+        exit(2);
+      }
+      else if (ump_pts.find(a) != ump_pts.end()
+            && ump_pts.find(b) != ump_pts.end())
+        continue;
+      else {
+        bool a_mapped = (mp_pts.find(a) != mp_pts.end());
+        auto parent = a_mapped ? mp_pts.find(a) : mp_pts.find(b);
+        auto child = a_mapped ? ump_pts.find(b) : ump_pts.find(a);
+        // Mark parent and child
+        (*child)->setParent(*parent);
+        ump_nets.erase(it);
+        mp_pts.insert(*child);
+        ump_pts.erase(child);
+        break;
+      }
+    }
+
+  }
+  std::cout << "Tree formation complete" << std::endl;
 }
