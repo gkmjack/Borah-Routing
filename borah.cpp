@@ -158,11 +158,14 @@ void Circuit::borah_route(FILE* output)
     }
     if(b_m.gain <= 0) {
       break;
-    } else {
+    }
+    // If a good steiner point is found
+    else {
       use(b_m.i->x, b_m.i->y, true);
       (*findPoint(b_m.i->x, b_m.i->y))->setSteiner();
       nets.erase(nets.find(b_m.n));
       nets.insert(new Net(b_m.i, b_m.n->getTail(), true));
+      // Enforce a direction in the new net
       if (b_m.a_e) {
         nets.insert(new Net(b_m.i, b_m.n->getHead(), true));
         nets.insert(new Net(b_m.e, b_m.i, true));
@@ -170,9 +173,11 @@ void Circuit::borah_route(FILE* output)
         nets.insert(new Net(b_m.n->getHead(), b_m.i, true));
         nets.insert(new Net(b_m.i, b_m.e, true));
       }
+      // Flip all the nets that lost shortcut to the root
       for (auto it = b_m.flipped.begin(); it!=b_m.flipped.end(); it++) {
         (*it)->flip();
       }
+      // Erase the longest net
       auto it = findNet(b_m.rh, b_m.rt);
       nets.erase(it);
 

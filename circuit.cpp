@@ -152,6 +152,7 @@ void Circuit::linkTree()
           (*it)->order(b, a);
           child = ump_pts.find(a);
         }
+        // Be sure which one is the parent / son
 
         // Mark parent and child
         ump_nets.erase(it);
@@ -219,10 +220,12 @@ redo:
       loop->longest = it;
       loop->flipped = up_trace;
       loop->left = left;
+      // The current state of the upward traversal
     }
     up_trace.push_back(*it);
     temp = temp->getParent();
   }
+  // Saving code
   if(left) {
     left = false;
     goto redo;
