@@ -71,6 +71,8 @@ void Circuit::borah_route(FILE* output)
     pair_t b_m;
     b_m.gain = 0;
     for (auto it_p = used_points.begin(); it_p!=used_points.end(); it_p++) {
+      // Sweepline algorithm
+      int x_l = 1, x_r = size, y_b = 1, y_t = size;
       for(auto it_n = nets.begin(); it_n!=nets.end(); it_n++) {
         Point* head = (*it_n)->getHead();
         Point* tail = (*it_n)->getTail();
@@ -80,6 +82,21 @@ void Circuit::borah_route(FILE* output)
         if(steiner->isUsed())
           continue;
         // Mark the steiner point;
+
+        // Check whether or not it's inside the sweepline
+        if((steiner->x >= x_l && steiner->x <= x_r)
+        || (steiner->y >= y_b && steiner->y <= y_t)) {
+          if(steiner->x > x_l && steiner->x <= (*it_p)->x)
+            x_l = steiner->x;
+          if(steiner->x < x_r && steiner->x >= (*it_p)->x)
+            x_r = steiner->x;
+          if(steiner->y > y_b && steiner->y <= (*it_p)->y)
+            y_b = steiner->y;
+          if(steiner->y < y_t && steiner->y >= (*it_p)->y)
+            y_t = steiner->y;
+        } else {
+          continue;
+        }
 
         int gain;
         Point *rh, *rt;
@@ -165,7 +182,8 @@ take_move:
       auto it = findNet(b_m.rh, b_m.rt);
       nets.erase(it);
 
-      std::cout << "New cost: " << totalCost() << std::endl;
+      printf("Inserted: (%d, %d)    ",b_m.i->x, b_m.i->y);
+      printf("New cost: %d\n", totalCost());
       dump_state(output);
     }
   }

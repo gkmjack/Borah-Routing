@@ -114,6 +114,7 @@ int Circuit::totalCost() const
 
 void Circuit::linkTree()
 {
+  std::cout << "Forming tree." << std::endl;
   for (auto it = all_points.begin(); it != all_points.end(); it++)
     (*it)->setParent(NULL);
 
