@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <ctime>
 
 #include <list>
 #include <set>
@@ -35,5 +36,8 @@ int main(int argc, char* argv[])
 
   c->generateMST();
   cout << "Total weight: " << c->totalCost() << endl;
+  clock_t start = clock();
   c->borah_route();
+  clock_t dur = clock() - start;
+  printf("Execution time: %.3f sec\n", (float)dur/CLOCKS_PER_SEC);
 }

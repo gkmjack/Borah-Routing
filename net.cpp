@@ -14,10 +14,10 @@ int Net::cost(int ax, int ay, int bx, int by)
   return abs(ax-bx) + abs(ay-by);
 }
 
-Net::Net(Point* a, Point* b):
+Net::Net(Point* a, Point* b, bool directed):
 head(a), tail(b), weight(Net::cost(a,b))
 {
-
+  if (directed) tail->setParent(head);
 }
 
 Point* Net::getHead() const

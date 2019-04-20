@@ -17,7 +17,10 @@ typedef struct {
   Point* rt; // Mark the net that will be removed
   std::vector<Net*> flipped; // These nets will be turned around
 
+  bool a_e; // Whether the external point is closer to root
+
 } pair_t;
+
 
 inline void compare(int& s, int& x_s, int& y_s, int x, int y, int ex, int ey)
 {
@@ -82,8 +85,8 @@ Point* find_steiner_point(Point* a, Point* b, Point* e)
 void Circuit::borah_route()
 {
   while(1) {
-    pair_t best_move;
-    best_move.gain = 0;
+    pair_t b_m;
+    b_m.gain = 0;
     for (auto it_p = used_points.begin(); it_p!=used_points.end(); it_p++) {
       for(auto it_n = nets.begin(); it_n!=nets.end(); it_n++) {
         Point* head = (*it_n)->getHead();
@@ -91,72 +94,87 @@ void Circuit::borah_route()
         if(head == *it_p || tail == *it_p)
           continue;
         Point* steiner = find_steiner_point(head, tail, *it_p);
-        /*
-        std::cout << "E: " << (*it_p)->x << " " <<(*it_p)->y<<std::endl;
-        std::cout << "H: " << head->x << " " <<head->y<<std::endl;
-        std::cout << "T: " << tail->x << " " <<tail->y<<std::endl;
-        std::cout << "S: " << steiner->x << " " <<steiner->y
-        <<std::endl<<std::endl;
-        */
         if(steiner->isUsed())
           continue;
         // Mark the steiner point;
 
         int gain;
         Point *rh, *rt;
+        std::vector<Net*> flipped;
+        bool a_e;
+        loop_t loop;
         // =============SUPER IMPORTANT===============
         // if the external point is a child of the tail
         if(closest_ancestor(tail, *it_p) == tail) {
-          std::set<Net*>::iterator r = longest_redundancy(tail, *it_p);
-          if((*r)->getWeight() >= Net::cost(steiner, tail)) {
-            rh = (*r)->getHead();
-            rt = (*r)->getTail();
-            gain = (*r)->getWeight() - Net::cost(steiner, *it_p);
+          longest_redundancy(tail, *it_p, &loop);
+          if((*(loop.longest))->getWeight() > Net::cost(steiner, tail)) {
+            rh = (*(loop.longest))->getHead();
+            rt = (*(loop.longest))->getTail();
+            gain = (*(loop.longest))->getWeight() - Net::cost(steiner, *it_p);
+            flipped = loop.flipped;
+            a_e = false;
           } else {
             rh = steiner;
             rt = tail;
             gain = Net::cost(steiner, tail) - Net::cost(steiner, *it_p);
+            for (Point* p = *it_p; p!=tail; p=p->getParent()) {
+              flipped.push_back(*findNet(p, p->getParent()));
+            }
+            a_e = false;
           }
         }
         // Otherwise
         else {
-          std::set<Net*>::iterator r = longest_redundancy(head, *it_p);
-          if((*r)->getWeight() >= Net::cost(steiner, head)) {
-            rh = (*r)->getHead();
-            rt = (*r)->getTail();
-            gain = (*r)->getWeight() - Net::cost(steiner, *it_p);
+          longest_redundancy(head, *it_p, &loop);
+          if((*(loop.longest))->getWeight() > Net::cost(steiner, head)) {
+            rh = (*(loop.longest))->getHead();
+            rt = (*(loop.longest))->getTail();
+            gain = (*(loop.longest))->getWeight() - Net::cost(steiner, *it_p);
+            flipped = loop.flipped;
+            a_e = loop.left;
           } else {
             rh = head;
             rt = steiner;
             gain = Net::cost(steiner, head) - Net::cost(steiner, *it_p);
+            // Nothing to flip
+            a_e = true;
           }
         }
 
 
-        if (gain > best_move.gain) {
-          best_move.e = *it_p;
-          best_move.i = steiner;
-          best_move.n = *it_n;
-          best_move.gain = gain;
-          best_move.rh = rh;
-          best_move.rt = rt;
+        if (gain > b_m.gain) {
+          b_m.e = *it_p;
+          b_m.i = steiner;
+          b_m.n = *it_n;
+          b_m.gain = gain;
+          b_m.rh = rh;
+          b_m.rt = rt;
+          b_m.flipped = flipped;
+          b_m.a_e = a_e;
         }
 
       }
     }
-    if(best_move.gain <= 0) {
+    if(b_m.gain <= 0) {
       break;
     } else {
-      use(best_move.i->x, best_move.i->y, true);
-      nets.erase(nets.find(best_move.n));
-      nets.insert(new Net(best_move.i, best_move.n->getHead()));
-      nets.insert(new Net(best_move.i, best_move.n->getTail()));
-      nets.insert(new Net(best_move.e, best_move.i));
-      auto it = findNet(best_move.rh, best_move.rt);
+      use(b_m.i->x, b_m.i->y, true);
+      (*findPoint(b_m.i->x, b_m.i->y))->setSteiner();
+      nets.erase(nets.find(b_m.n));
+      nets.insert(new Net(b_m.i, b_m.n->getTail(), true));
+      if (b_m.a_e) {
+        nets.insert(new Net(b_m.i, b_m.n->getHead(), true));
+        nets.insert(new Net(b_m.e, b_m.i, true));
+      } else {
+        nets.insert(new Net(b_m.n->getHead(), b_m.i, true));
+        nets.insert(new Net(b_m.i, b_m.e, true));
+      }
+      for (auto it = b_m.flipped.begin(); it!=b_m.flipped.end(); it++) {
+        (*it)->flip();
+      }
+      auto it = findNet(b_m.rh, b_m.rt);
       nets.erase(it);
 
-
-      linkTree();
       std::cout << "New cost: " << totalCost() << std::endl;
     }
   }

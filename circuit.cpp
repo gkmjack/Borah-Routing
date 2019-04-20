@@ -94,7 +94,7 @@ void Circuit::generateMST()
     }
     // Find the minimum-cost net. The map can't contain just 1 element
 
-    nets.insert(new Net(*min_m, *min_u));
+    nets.insert(new Net(*min_m, *min_u, false));
     // Create a new net
     mapped.insert(*min_u);
     unmapped.erase(min_u);
@@ -200,28 +200,31 @@ Point* Circuit::closest_ancestor(Point* p1, Point* p2)
   }
 }
 
-std::set<Net*>::iterator Circuit::longest_redundancy(Point* p1, Point* p2)
+void Circuit::longest_redundancy(Point* p1, Point* p2, loop_t* loop)
 {
   Point* cca = closest_ancestor(p1, p2);
 
   // Find the longest among nets up to that ancestor
-  auto longest = nets.end();
-  int highest_cost = 0;
-  bool go_again = true;
+  loop->longest = nets.end();
+  bool left = true;
   Point* temp;
+  std::vector<Net*> up_trace;
 redo:
-  temp = go_again ? p1 : p2;
+  temp = left ? p1 : p2;
+  up_trace.clear();
   while(temp != cca) {
     auto it = findNet(temp, temp->getParent());
-    if (longest==nets.end() || (*it)->getWeight()>(*longest)->getWeight()) {
-      longest = it;
-      highest_cost = (*it)->getWeight();
+    if (loop->longest == nets.end() ||
+        (*it)->getWeight() > (*(loop->longest))->getWeight()) {
+      loop->longest = it;
+      loop->flipped = up_trace;
+      loop->left = left;
     }
+    up_trace.push_back(*it);
     temp = temp->getParent();
   }
-  if(go_again) {
-    go_again = false;
+  if(left) {
+    left = false;
     goto redo;
   }
-  return longest;
 }

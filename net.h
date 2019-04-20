@@ -10,7 +10,7 @@ private:
 public:
   static int cost(Point*, Point*);
   static int cost(int, int, int, int);
-  Net(Point*, Point*);
+  Net(Point*, Point*, bool);
   void flip();
   Point* getHead() const;
   Point* getTail() const;

@@ -4,6 +4,11 @@
 class Point;
 class Net;
 
+typedef struct {
+  std::set<Net*>::iterator longest;
+  std::vector<Net*> flipped;
+  bool left;
+} loop_t;
 
 class Circuit
 {
@@ -26,6 +31,6 @@ public:
 
   void linkTree();
   Point* closest_ancestor(Point*, Point*);
-  std::set<Net*>::iterator longest_redundancy(Point*, Point*);
+  void longest_redundancy(Point*, Point*, loop_t*);
   void borah_route();
 };
