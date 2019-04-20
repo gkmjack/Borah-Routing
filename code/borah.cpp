@@ -51,32 +51,14 @@ Point* find_steiner_point(Point* a, Point* b, Point* e)
     y_t = a->y;
   }
   // Find the four edges
-  int shortest = 0, x_s, y_s;
-  int x, y;
-  // Bot side
-  x = x_l;
-  y = y_b;
-  for (; x < x_r; x++) {
-    compare(shortest, x_s, y_s, x, y, e->x, e->y);
-  }
-  // Right side
-  x = x_r;
-  y = y_b;
-  for (; y < y_t; y++) {
-    compare(shortest, x_s, y_s, x, y, e->x, e->y);
-  }
-  // Top side
-  x = x_r;
-  y = y_t;
-  for (; x > x_l; x--) {
-    compare(shortest, x_s, y_s, x, y, e->x, e->y);
-  }
-  // Left side
-  x = x_l;
-  y = y_t;
-  for (; y > y_b; y--) {
-    compare(shortest, x_s, y_s, x, y, e->x, e->y);
-  }
+  int x_s, y_s;
+  if (e->x >= x_r) x_s = x_r;
+  else if (e->x <= x_l) x_s = x_l;
+  else x_s = e->x;
+
+  if (e->y <= y_b) y_s = y_b;
+  else if (e->y >= y_t) y_s = y_t;
+  else y_s = e->y;
 
   return *(c->findPoint(x_s, y_s));
 
@@ -152,6 +134,7 @@ void Circuit::borah_route(FILE* output)
           b_m.rt = rt;
           b_m.flipped = flipped;
           b_m.a_e = a_e;
+          goto take_move; // Could improve performance
         }
 
       }
@@ -161,6 +144,7 @@ void Circuit::borah_route(FILE* output)
     }
     // If a good steiner point is found
     else {
+take_move:
       use(b_m.i->x, b_m.i->y, true);
       (*findPoint(b_m.i->x, b_m.i->y))->setSteiner();
       nets.erase(nets.find(b_m.n));
