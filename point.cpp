@@ -4,6 +4,7 @@ Point::Point(int x, int y):
 x(x), y(y), parent(0)
 {
   used = false;
+  steiner = false;
 }
 
 void Point::use(bool state)
@@ -24,6 +25,16 @@ int Point::getY() const
 bool Point::isUsed() const
 {
   return used;
+}
+
+bool Point::isSteiner() const
+{
+  return steiner;
+}
+
+void Point::setSteiner()
+{
+  steiner = true;
 }
 
 void Point::setParent(Point* p)

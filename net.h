@@ -3,14 +3,17 @@ class Point;
 class Net
 {
 private:
-  Point* a;
-  Point* b;
+  Point* head; // Closer to root
+  Point* tail; // Closer to leaf
   const int weight;
 
 public:
-  static int cost(Point* a, Point* b);
+  static int cost(Point*, Point*);
+  static int cost(int, int, int, int);
   Net(Point*, Point*);
-  Point* getA() const;
-  Point* getB() const;
+  void flip();
+  Point* getHead() const;
+  Point* getTail() const;
+  void order(Point*, Point*);
   const int getWeight() const;
 };

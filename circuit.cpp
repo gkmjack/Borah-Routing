@@ -6,20 +6,20 @@
 #include <iostream>
 
 
-auto Circuit::findPoint(int x, int y) const
+std::vector<Point*>::const_iterator Circuit::findPoint(int x, int y) const
 {
   int index = (y-1)*size+(x-1);
-  auto it = all_points.begin();
+  std::vector<Point*>::const_iterator it = all_points.begin();
   for (int i = 0; i < index; i++) it++;
   return it;
 }
 
-auto Circuit::findNet(Point* p1, Point* p2) const
+std::set<Net*>::iterator Circuit::findNet(Point* p1, Point* p2) const
 {
   auto it = nets.begin();
   while(it != nets.end()) {
-    Point* a = (*it)->getA();
-    Point* b = (*it)->getB();
+    Point* a = (*it)->getHead();
+    Point* b = (*it)->getTail();
     if((a == p1 && b == p2) || (a == p2 && b == p1)) {
       return it;
     }
@@ -101,7 +101,6 @@ void Circuit::generateMST()
     // Transfer the net into the other list
   }
   linkTree();
-  test();
 }
 
 int Circuit::totalCost() const
@@ -135,8 +134,8 @@ void Circuit::linkTree()
 
   while(!ump_nets.empty()) {
     for(auto it = ump_nets.begin(); it != ump_nets.end(); it++) {
-      Point* a = (*it)->getA();
-      Point* b = (*it)->getB();
+      Point* a = (*it)->getHead();
+      Point* b = (*it)->getTail();
       if(mp_pts.find(a) != mp_pts.end() && mp_pts.find(b) != mp_pts.end()) {
         std::cout << "A loop is contained!" << std::endl;
         exit(2);
@@ -145,11 +144,16 @@ void Circuit::linkTree()
             && ump_pts.find(b) != ump_pts.end())
         continue;
       else {
-        bool a_mapped = (mp_pts.find(a) != mp_pts.end());
-        auto parent = a_mapped ? mp_pts.find(a) : mp_pts.find(b);
-        auto child = a_mapped ? ump_pts.find(b) : ump_pts.find(a);
+        std::set<Point*>::iterator child;
+        if (mp_pts.find(a) != mp_pts.end()) {
+          (*it)->order(a, b);
+          child = ump_pts.find(b);
+        } else {
+          (*it)->order(b, a);
+          child = ump_pts.find(a);
+        }
+
         // Mark parent and child
-        (*child)->setParent(*parent);
         ump_nets.erase(it);
         mp_pts.insert(*child);
         ump_pts.erase(child);
@@ -165,6 +169,7 @@ Point* Circuit::closest_ancestor(Point* p1, Point* p2)
 {
   // Find the closest common ancestor between the two nodes
   std::vector<Point*> p1_anc, p2_anc;
+  bool go_again = true;
   Point* temp = p1;
   while(temp) {
     p1_anc.push_back(temp);

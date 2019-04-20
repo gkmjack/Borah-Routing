@@ -35,4 +35,5 @@ int main(int argc, char* argv[])
 
   c->generateMST();
   cout << "Total weight: " << c->totalCost() << endl;
+  c->borah_route();
 }

@@ -13,8 +13,6 @@ private:
   std::set<Net*> nets;
   const int size;
 
-  auto findPoint(int, int) const;
-  auto findNet(Point*,Point*) const;
 
 public:
   Circuit(int);
@@ -22,6 +20,9 @@ public:
   bool isUsed(int, int) const;
   void generateMST();
   int totalCost() const;
+
+  std::vector<Point*>::const_iterator findPoint(int, int) const;
+  std::set<Net*>::iterator findNet(Point*,Point*) const;
 
   void linkTree();
   Point* closest_ancestor(Point*, Point*);
