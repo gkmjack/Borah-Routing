@@ -30,6 +30,3 @@
 *.exe
 *.out
 *.app
-
-# Test files
-*.pts
