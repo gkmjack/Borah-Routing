@@ -40,3 +40,13 @@ void parse_file(char* filename, int num_pts)
     c->use(x, y, true);
   }
 }
+
+void confirm_output(char* filename, FILE** fd)
+{
+  *fd = fopen(filename, "w");
+  if(*fd == NULL) {
+    cout << "Can't create output file." << endl;
+    exit(2);
+  }
+  return;
+}

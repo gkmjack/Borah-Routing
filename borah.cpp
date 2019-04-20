@@ -82,8 +82,9 @@ Point* find_steiner_point(Point* a, Point* b, Point* e)
 
 }
 
-void Circuit::borah_route()
+void Circuit::borah_route(FILE* output)
 {
+  dump_state(output);
   while(1) {
     pair_t b_m;
     b_m.gain = 0;
@@ -176,6 +177,7 @@ void Circuit::borah_route()
       nets.erase(it);
 
       std::cout << "New cost: " << totalCost() << std::endl;
+      dump_state(output);
     }
   }
   std::cout << "All done!! "<< std::endl;

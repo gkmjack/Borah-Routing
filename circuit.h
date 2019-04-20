@@ -1,5 +1,6 @@
 #include <vector>
 #include <set>
+#include <stdio.h>
 
 class Point;
 class Net;
@@ -32,5 +33,6 @@ public:
   void linkTree();
   Point* closest_ancestor(Point*, Point*);
   void longest_redundancy(Point*, Point*, loop_t*);
-  void borah_route();
+  void borah_route(FILE*);
+  void dump_state(FILE*);
 };
