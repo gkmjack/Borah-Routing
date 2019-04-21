@@ -64,9 +64,10 @@ Point* find_steiner_point(Point* a, Point* b, Point* e)
 
 }
 
-void Circuit::borah_route(FILE* output)
+void Circuit::borah_route()
 {
-  dump_state(output);
+  int pointsAdded = 0;
+  dump_iteration(0);
   while(1) {
     pair_t b_m;
     b_m.gain = 0;
@@ -184,7 +185,8 @@ take_move:
 
       printf("Inserted: (%d, %d)    ",b_m.i->x, b_m.i->y);
       printf("New cost: %d\n", totalCost());
-      dump_state(output);
+      pointsAdded++;
+      dump_iteration(pointsAdded);
     }
   }
   std::cout << "All done!! "<< std::endl;

@@ -27,7 +27,7 @@ public:
   Circuit(int);
   void use(int, int, bool); // Mark a point as used
   bool isUsed(int, int) const;
-  void generateMST(); // Generate MST using Prim's algorithm
+  void prim_MST(); // Generate MST using Prim's algorithm
   int totalCost() const;
 
   std::vector<Point*>::const_iterator findPoint(int, int) const;
@@ -39,7 +39,7 @@ public:
   // Closest common ancestor between two points in the net
   void longest_redundancy(Point*, Point*, loop_t*);
   // Find the longest net in a forming loop
-  void borah_route(FILE*);
-  void dump_state(FILE*);
-  // Dump the current state of circuit into a file for display
+  void borah_route();
+  void dump_iteration(int);
+  // Dump after each point is added
 };

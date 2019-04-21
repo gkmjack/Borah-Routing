@@ -62,7 +62,7 @@ bool Circuit::isUsed(int x, int y) const
   return p->isUsed();
 }
 
-void Circuit::generateMST()
+void Circuit::prim_MST()
 {
   nets.clear();
   // Erase existing contents

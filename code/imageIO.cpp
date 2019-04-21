@@ -1,28 +1,26 @@
 #include "circuit.h"
 #include "point.h"
 #include "net.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
-void Circuit::dump_state(FILE* output)
-{
-  for(int y = size; y > 0; y--) {
-    for(int x = 1; x <= size; x++) {
-      Point* p = *findPoint(x,y);
-      if(!p->isUsed())
-        fputs("0", output);
-      else
-        fputs(p->isSteiner()?"2":"1", output);
-    }
-    fputs("\n", output);
-  }
-  // Dump all the point usage
+using namespace std;
+
+void Circuit::dump_iteration(int n) {
+  ofstream myfile;
+  std::string out_string;
+  std::stringstream ss;
+  ss << n;
+  out_string = ss.str();
+  string s = "./Outputs/" + out_string + ".pts";
+  myfile.open(s.c_str());
+  //cout << s << endl;
 
   for(auto it = nets.begin(); it!=nets.end(); it++) {
     Point* head = (*it)->getHead();
     Point* tail = (*it)->getTail();
-    fprintf(output,"(%d %d %d %d)\n",
-    head->x, head->y, tail->x, tail->y);
+    myfile << head->x << " " << head->y << " " << tail->x << " " << tail->y << "\n";
   }
-  // Dump all the nets
-
-  fputs("*****************\n", output);
+  myfile.close();
 }
