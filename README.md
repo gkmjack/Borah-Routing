@@ -1,5 +1,7 @@
 # borah-routing
 ECE-6133 final project
+
+
 Authors: Kaiming Guan, Ethan Lyons
 
 This part of the program implements Borah routing and generates the final MST tree.
@@ -10,4 +12,4 @@ Usage:
 2. type 'make'
 3. Drag ./borah.out along with input files into a same folder.
 4. type './borah.out [INPUT_FILE]'
-5. The intermediate stage after insertion of each Steiner point will be stored in ./Output/ directory.
+5. The intermediate stage after insertion of each Steiner point will be stored in ./outputs/ directory.
