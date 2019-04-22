@@ -10,3 +10,4 @@ Usage:
 2. type 'make'
 3. Drag ./borah.out along with input files into a same folder.
 4. type './borah.out [INPUT_FILE]'
+5. The intermediate stage after insertion of each Steiner point will be stored in ./Output/ directory.
